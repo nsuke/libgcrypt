@@ -19,6 +19,9 @@
 
 # Process this file with automake to produce Makefile.in
 
+include $(top_srcdir)/cuda.mk
+LINK = $(LIBTOOL) --mode=link $(CC) -o  $@ $(CUDA_LDFLAGS) $(CUDA_LIBS)
+
 # Need to include ../src in addition to top_srcdir because gcrypt.h is
 # a built header.
 AM_CPPFLAGS = -I../src -I$(top_srcdir)/src -I../mpi -I$(top_srcdir)/mpi
@@ -130,6 +133,7 @@ EXTRA_libcipher_la_SOURCES = \
 	rfc2268.c \
 	camellia.c camellia.h camellia-glue.c camellia-aesni-avx-amd64.S \
 	camellia-aesni-avx2-amd64.S camellia-arm.S camellia-aarch64.S \
+	camellia-cuda.cu \
 	blake2.c \
 	blake2b-amd64-avx2.S blake2s-amd64-avx.S
 

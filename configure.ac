@@ -684,6 +684,14 @@ AC_ARG_ENABLE(ppc-crypto-support,
               ppccryptosupport=$enableval,ppccryptosupport=yes)
 AC_MSG_RESULT($ppccryptosupport)
 
+# Implementation of the --disable-cuda-support switch.
+AC_MSG_CHECKING([whether CUDA support is requested])
+AC_ARG_ENABLE(cuda-support,
+              AC_HELP_STRING([--disable-cuda-support],
+                 [Disable support for the CUDA instructions]),
+	      cudasupport=$enableval,cudasupport=yes)
+AC_MSG_RESULT($cudasupport)
+
 # Implementation of the --disable-O-flag-munging switch.
 AC_MSG_CHECKING([whether a -O flag munging is requested])
 AC_ARG_ENABLE([O-flag-munging],
@@ -2286,6 +2294,10 @@ if test x"$drngsupport" = xyes ; then
   AC_DEFINE(ENABLE_DRNG_SUPPORT, 1,
             [Enable support for Intel DRNG (RDRAND instruction).])
 fi
+if test x"$cudasupport" = xyes ; then
+  AC_DEFINE(ENABLE_CUDA_SUPPORT,1,
+            [Enable support for CUDA.])
+fi
 
 
 # Define conditional sources and config.h symbols depending on the
@@ -2498,6 +2510,10 @@ if test "$found" = "1" ; then
         # Build with the AES-NI/AVX2 implementation
         GCRYPT_CIPHERS="$GCRYPT_CIPHERS camellia-aesni-avx2-amd64.lo"
       fi
+   fi
+
+   if test x"$cudasupport" = xyes ; then
+     GCRYPT_CIPHERS="$GCRYPT_CIPHERS camellia-cuda.lo"
    fi
 fi
 
@@ -3008,6 +3024,38 @@ tests/Makefile
 ])
 AC_CONFIG_FILES([tests/hashtest-256g], [chmod +x tests/hashtest-256g])
 AC_CONFIG_FILES([tests/basic-disable-all-hwf], [chmod +x tests/basic-disable-all-hwf])
+
+#find out what version we are running
+ARCH=`uname -m`
+if [[ $ARCH == "x86_64" ]];
+then
+  SUFFIX="64"
+else
+  SUFFIX=""
+fi
+
+# Setup CUDA paths
+# ------------------------------------------------------------------------------
+AC_ARG_WITH([cuda],
+   [  --with-cuda=PATH    prefix where cuda is installed [default=/usr/local/cuda]])
+
+if test -n "$with_cuda"
+then
+   CUDA_CFLAGS="-I$with_cuda/include"
+   CUDA_LIBS="-lcudart"
+   CUDA_LDFLAGS="-L$with_cuda/lib$SUFFIX"
+   NVCC="$with_cuda/bin/nvcc"
+else
+   CUDA_CFLAGS="-I/usr/local/cuda/include"
+   CUDA_LIBS="-lcudart"
+   CUDA_LDFLAGS="-L/usr/local/cuda/lib$SUFFIX"
+   NVCC="nvcc"
+fi
+AC_SUBST(CUDA_CFLAGS)
+AC_SUBST(CUDA_LIBS)
+AC_SUBST(CUDA_LDFLAGS)
+AC_SUBST(NVCC)
+
 AC_OUTPUT
 
 
@@ -3038,6 +3086,7 @@ GCRY_MSG_SHOW([Try using Intel AVX2:     ],[$avx2support])
 GCRY_MSG_SHOW([Try using ARM NEON:       ],[$neonsupport])
 GCRY_MSG_SHOW([Try using ARMv8 crypto:   ],[$armcryptosupport])
 GCRY_MSG_SHOW([Try using PPC crypto:     ],[$ppccryptosupport])
+GCRY_MSG_SHOW([Try using CUDA:           ],[$cudasupport])
 GCRY_MSG_SHOW([],[])
 
 if test "x${gpg_config_script_warn}" != x; then
