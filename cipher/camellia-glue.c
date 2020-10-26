@@ -214,15 +214,13 @@ extern void _gcry_camellia_cuda_ocb_enc(CAMELLIA_context *ctx,
                                         unsigned char *out,
                                         const unsigned char *in,
                                         unsigned char *offset,
-                                        unsigned char *checksum,
-                                        const u64 Ls[32]) ASM_FUNC_ABI;
+                                        unsigned char *checksum) ASM_FUNC_ABI;
 
 extern void _gcry_camellia_cuda_ocb_dec(CAMELLIA_context *ctx,
                                         unsigned char *out,
                                         const unsigned char *in,
                                         unsigned char *offset,
-                                        unsigned char *checksum,
-                                        const u64 Ls[32]) ASM_FUNC_ABI;
+                                        unsigned char *checksum) ASM_FUNC_ABI;
 #endif
 
 static const char *selftest(void);

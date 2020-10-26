@@ -24,15 +24,13 @@ void _gcry_camellia_cuda_ocb_enc(CAMELLIA_context* ctx,
                                  unsigned char* out,
                                  const unsigned char* in,
                                  unsigned char* offset,
-                                 unsigned char* checksum,
-                                 const u64 Ls[32]);
+                                 unsigned char* checksum);
 
 void _gcry_camellia_cuda_ocb_dec(CAMELLIA_context* ctx,
                                  unsigned char* out,
                                  const unsigned char* in,
                                  unsigned char* offset,
-                                 unsigned char* checksum,
-                                 const u64 Ls[32]);
+                                 unsigned char* checksum);
 }
 
 __global__ void VecAdd(float* A, float* B, float* C) {
@@ -44,12 +42,10 @@ void _gcry_camellia_cuda_ocb_enc(CAMELLIA_context* ctx,
                                  unsigned char* out,
                                  const unsigned char* in,
                                  unsigned char* offset,
-                                 unsigned char* checksum,
-                                 const u64 Ls[32]) {}
+                                 unsigned char* checksum) {}
 
 void _gcry_camellia_cuda_ocb_dec(CAMELLIA_context* ctx,
                                  unsigned char* out,
                                  const unsigned char* in,
                                  unsigned char* offset,
-                                 unsigned char* checksum,
-                                 const u64 Ls[32]) {}
+                                 unsigned char* checksum) {}
