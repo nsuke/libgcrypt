@@ -91,6 +91,12 @@
 # endif
 #endif
 
+/* USE_CUDA inidicates whether to compile with NVIDIA CUDA code. */
+#undef USE_CUDA
+#if defined(ENABLE_CUDA_SUPPORT)
+# define USE_CUDA 1
+#endif
+
 typedef struct
 {
   KEY_TABLE_TYPE keytable;
@@ -199,6 +205,24 @@ extern void _gcry_camellia_aesni_avx2_ocb_auth(CAMELLIA_context *ctx,
 					       unsigned char *offset,
 					       unsigned char *checksum,
 					       const u64 Ls[32]) ASM_FUNC_ABI;
+#endif
+
+#ifdef USE_CUDA
+/* GPU implementations of Camellia using CUDA
+ */
+extern void _gcry_camellia_cuda_ocb_enc(CAMELLIA_context *ctx,
+                                        unsigned char *out,
+                                        const unsigned char *in,
+                                        unsigned char *offset,
+                                        unsigned char *checksum,
+                                        const u64 Ls[32]) ASM_FUNC_ABI;
+
+extern void _gcry_camellia_cuda_ocb_dec(CAMELLIA_context *ctx,
+                                        unsigned char *out,
+                                        const unsigned char *in,
+                                        unsigned char *offset,
+                                        unsigned char *checksum,
+                                        const u64 Ls[32]) ASM_FUNC_ABI;
 #endif
 
 static const char *selftest(void);
@@ -634,7 +658,7 @@ static size_t
 _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
 			  const void *inbuf_arg, size_t nblocks, int encrypt)
 {
-#if defined(USE_AESNI_AVX) || defined(USE_AESNI_AVX2)
+#if defined(USE_AESNI_AVX) || defined(USE_AESNI_AVX2) || defined(USE_CUDA)
   CAMELLIA_context *ctx = (void *)&c->context.c;
   unsigned char *outbuf = outbuf_arg;
   const unsigned char *inbuf = inbuf_arg;
@@ -650,6 +674,16 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
   (void)encrypt;
 #endif
 
+#ifdef USE_CUDA
+  {
+    if (encrypt)
+      _gcry_camellia_cuda_ocb_enc(ctx, outbuf, inbuf, c->u_iv.iv,
+                                  c->u_ctr.ctr);
+    else
+      _gcry_camellia_cuda_ocb_dec(ctx, outbuf, inbuf, c->u_iv.iv,
+                                  c->u_ctr.ctr);
+  }
+#else
 #ifdef USE_AESNI_AVX2
   if (ctx->use_aesni_avx2)
     {
@@ -771,8 +805,9 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
       /* Use generic code to handle smaller chunks... */
     }
 #endif
+#endif
 
-#if defined(USE_AESNI_AVX) || defined(USE_AESNI_AVX2)
+#if defined(USE_AESNI_AVX) || defined(USE_AESNI_AVX2) || defined(USE_CUDA)
   c->u_mode.ocb.data_nblocks = blkn;
 
   if (burn_stack_depth)
