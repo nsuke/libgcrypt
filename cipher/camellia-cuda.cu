@@ -996,33 +996,6 @@ void camellia_decrypt256(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     return;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #define OCB_L_TABLE_SIZE 34
 #define OCB_BLOCK_LEN  (128/8)
 
@@ -1098,14 +1071,6 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
                                          uint64_t numBlocks,
                                          const unsigned char* L,
                                          int encrypt) {
-
-  // printf(" ### keylen=%d, pos=%llu, nblk=%llu, enc=%d\n", ctx->keybitlength, pos, numBlocks, encrypt);
-
-  // for (size_t i = 0; i < numBlocks * CAMELLIA_BLOCK_SIZE && i < 16; ++i) {
-  //   printf("%02x ", in[i]);
-  // }
-  // printf("\n");
-
   auto grid_size = (numBlocks - 1) / kThreadSize + 1;
   // auto grid_size = numBlocks / kThreadSize;
   auto process_size = min(numBlocks, grid_size * kThreadSize);
@@ -1149,25 +1114,20 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
   if (!checkError(__LINE__))
     return 0;
 
-  cudaDeviceSynchronize();
   checkError(__LINE__);
   if (encrypt) {
     if (ctx->keybitlength == 128) {
-      // printf("calling camellia_encrypt128\n");
       camellia_encrypt128<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     } else {
       camellia_encrypt256<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     }
   } else {
     if (ctx->keybitlength == 128) {
-      // printf("calling camellia_decrypt128\n");
       camellia_decrypt128<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     } else {
       camellia_decrypt256<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     }
   }
-  checkError(__LINE__);
-  cudaDeviceSynchronize();
   checkError(__LINE__);
 
   cudaMemcpy(out, buf, copy_size, cudaMemcpyDeviceToHost);
@@ -1178,10 +1138,5 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
                   reinterpret_cast<const __int128_t*>(out), process_size);
   }
 
-  // printf("out: ");
-  // for (size_t i = 0; i < numBlocks * CAMELLIA_BLOCK_SIZE && i < 16; ++i) {
-  //   printf("%02x ", out[i]);
-  // }
-  // printf("\n");
   return process_size;
 }
