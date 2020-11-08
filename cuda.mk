@@ -1,5 +1,5 @@
 .cu.o:
-	$(NVCC) -std=c++17 -o $@ -c $<
+	$(NVCC) -std=c++17 --no-exceptions -o $@ -c $<
 
 .cu.lo:
-	$(top_srcdir)/cudalt.py $@ $(NVCC) -std=c++17 --compiler-options=\" $(CFLAGS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \" -c $<
+	$(top_srcdir)/cudalt.py $@ $(NVCC) -std=c++17 --no-exceptions --compiler-options=\" $(CFLAGS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \" -c $<

@@ -476,6 +476,8 @@ __device__ const u32 camellia_sp4404[256] = {
     0xe3e300e3,0xf4f400f4,0xc7c700c7,0x9e9e009e,
 };
 
+#define BYTESWAP(I) __byte_perm(I, 0, 0x0123)
+
 /**
  * Stuff related to camellia encryption/decryption
  *
@@ -487,10 +489,16 @@ void camellia_encrypt128(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     auto idx = blockIdx.x * blockDim.x + threadIdx.x;
     auto io = &io_buf[idx * 4];
     auto offset = &offset_buf[idx * 4];
+
     io[0] ^= offset[0];
     io[1] ^= offset[1];
     io[2] ^= offset[2];
     io[3] ^= offset[3];
+
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
 
     u32 il, ir, t0, t1;
 
@@ -577,6 +585,16 @@ void camellia_encrypt128(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     io[2] = t0;
     io[3] = t1;
 
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
+    io[0] ^= offset[0];
+    io[1] ^= offset[1];
+    io[2] ^= offset[2];
+    io[3] ^= offset[3];
+
     return;
 }
 
@@ -586,10 +604,16 @@ void camellia_decrypt128(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     uint32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     auto io = &io_buf[idx * 4];
     auto offset = &offset_buf[idx * 4];
+
     io[0] ^= offset[0];
     io[1] ^= offset[1];
     io[2] ^= offset[2];
     io[3] ^= offset[3];
+
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
 
     u32 il,ir,t0,t1;               /* temporary valiables */
 
@@ -676,6 +700,16 @@ void camellia_decrypt128(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     io[2] = t0;
     io[3] = t1;
 
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
+    io[0] ^= offset[0];
+    io[1] ^= offset[1];
+    io[2] ^= offset[2];
+    io[3] ^= offset[3];
+
     return;
 }
 
@@ -688,10 +722,17 @@ void camellia_encrypt256(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     uint32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     auto io = &io_buf[idx * 4];
     auto offset = &offset_buf[idx * 4];
+
     io[0] ^= offset[0];
     io[1] ^= offset[1];
     io[2] ^= offset[2];
     io[3] ^= offset[3];
+
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
 
     u32 il,ir,t0,t1;           /* temporary valiables */
 
@@ -802,6 +843,16 @@ void camellia_encrypt256(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     io[2] = t0;
     io[3] = t1;
 
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
+    io[0] ^= offset[0];
+    io[1] ^= offset[1];
+    io[2] ^= offset[2];
+    io[3] ^= offset[3];
+
     return;
 }
 
@@ -811,10 +862,17 @@ void camellia_decrypt256(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     uint32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     auto io = &io_buf[idx * 4];
     auto offset = &offset_buf[idx * 4];
+
     io[0] ^= offset[0];
     io[1] ^= offset[1];
     io[2] ^= offset[2];
     io[3] ^= offset[3];
+
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
 
     u32 il,ir,t0,t1;           /* temporary valiables */
 
@@ -925,12 +983,58 @@ void camellia_decrypt256(const u32 *subkey, u32 *io_buf, const u32 *offset_buf)
     io[2] = t0;
     io[3] = t1;
 
+    io[0] = BYTESWAP(io[0]);
+    io[1] = BYTESWAP(io[1]);
+    io[2] = BYTESWAP(io[2]);
+    io[3] = BYTESWAP(io[3]);
+
+    io[0] ^= offset[0];
+    io[1] ^= offset[1];
+    io[2] ^= offset[2];
+    io[3] ^= offset[3];
+
     return;
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define OCB_L_TABLE_SIZE 34
 #define OCB_BLOCK_LEN  (128/8)
+
+bool checkError(int line) {
+  cudaError_t err = cudaGetLastError();
+  if (cudaSuccess != err) {
+    fprintf(stderr, "L%d: CUDA error : (%d) %s\n", line, static_cast<int>(err),
+            cudaGetErrorString(err));
+    return false;
+  }
+  return true;
+}
 
 constexpr auto kThreadSize = 128;
 
@@ -938,7 +1042,7 @@ namespace {
 
 void _gen_offset(__int128_t *offsets, __int128_t *offset, uint64_t pos, const __int128_t* L, size_t size)
 {
-  offsets[0] = *offset ^ L[0];
+  offsets[0] = *offset ^ L[__builtin_ctzll(1 + pos)];
   for (size_t i = 1; i < size; ++i) {
     offsets[i] = offsets[i - 1] ^ L[__builtin_ctzll(i + 1 + pos)];
   }
@@ -952,6 +1056,37 @@ void _gen_checksum(__int128_t* checksum, const __int128_t* data, size_t size)
   }
 }
 
+template <typename T>
+struct CudaMem {
+  T* ptr;
+
+  ~CudaMem() {
+    reset();
+  }
+
+  void reset() {
+    if (ptr) {
+      cudaFree(ptr);
+      checkError(__LINE__);
+      ptr = nullptr;
+    }
+  }
+
+  operator T*() {
+    return ptr;
+  }
+};
+
+template <typename T>
+CudaMem<T> allocateCuda(size_t size) {
+  T* ptr;
+  cudaMalloc(&ptr, size);
+  if (!checkError(__LINE__)) {
+    return {nullptr};
+  }
+  return {ptr};
+}
+
 }
 
 uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
@@ -963,10 +1098,19 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
                                          uint64_t numBlocks,
                                          const unsigned char* L,
                                          int encrypt) {
-  // printf(" ### SIZE = %lu\n", numBlocks);
+
+  // printf(" ### keylen=%d, pos=%llu, nblk=%llu, enc=%d\n", ctx->keybitlength, pos, numBlocks, encrypt);
+
+  // for (size_t i = 0; i < numBlocks * CAMELLIA_BLOCK_SIZE && i < 16; ++i) {
+  //   printf("%02x ", in[i]);
+  // }
+  // printf("\n");
+
   auto grid_size = (numBlocks - 1) / kThreadSize + 1;
+  // auto grid_size = numBlocks / kThreadSize;
   auto process_size = min(numBlocks, grid_size * kThreadSize);
-  auto buffer_size = grid_size * kThreadSize * CAMELLIA_BLOCK_SIZE;
+  auto buffer_size =
+      max(numBlocks, grid_size * kThreadSize) * CAMELLIA_BLOCK_SIZE;
   auto copy_size = process_size * CAMELLIA_BLOCK_SIZE;
 
   if (process_size == 0) {
@@ -978,48 +1122,66 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
                   reinterpret_cast<const __int128_t*>(in), process_size);
   }
 
-  u32* offset_buf;
+  auto offset_buf = allocateCuda<u32>(buffer_size);
+  if (!offset_buf) return 0;
   {
     char offsets[buffer_size];
     _gen_offset(reinterpret_cast<__int128_t*>(offsets),
-                reinterpret_cast<__int128_t*>(offset),
-                pos,
+                reinterpret_cast<__int128_t*>(offset), pos,
                 reinterpret_cast<const __int128_t*>(L), process_size);
 
-    cudaMalloc(&offset_buf, buffer_size);
-    cudaMemcpy(offset_buf, offsets, buffer_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(offset_buf, offsets, copy_size, cudaMemcpyHostToDevice);
+    if (!checkError(__LINE__))
+      return 0;
   }
 
-  u32* buf;
-  cudaMalloc(&buf, buffer_size);
-  cudaMemcpy(buf, in, copy_size, cudaMemcpyHostToDevice);
+  auto key_buf = allocateCuda<u32>(sizeof(ctx->keytable));
+  if (!key_buf) return 0;
 
+  cudaMemcpy(key_buf, ctx->keytable, sizeof(ctx->keytable),
+             cudaMemcpyHostToDevice);
+  if (!checkError(__LINE__))
+    return 0;
+
+  auto buf = allocateCuda<u32>(buffer_size);
+  if (!buf) return 0;
+  cudaMemcpy(buf, in, copy_size, cudaMemcpyHostToDevice);
+  if (!checkError(__LINE__))
+    return 0;
+
+  cudaDeviceSynchronize();
+  checkError(__LINE__);
   if (encrypt) {
     if (ctx->keybitlength == 128) {
-      camellia_encrypt128<<<grid_size, kThreadSize>>>(ctx->keytable, buf,
-                                                      offset_buf);
+      // printf("calling camellia_encrypt128\n");
+      camellia_encrypt128<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     } else {
-      camellia_encrypt256<<<grid_size, kThreadSize>>>(ctx->keytable, buf,
-                                                      offset_buf);
+      camellia_encrypt256<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     }
   } else {
     if (ctx->keybitlength == 128) {
-      camellia_decrypt128<<<grid_size, kThreadSize>>>(ctx->keytable, buf,
-                                                      offset_buf);
+      // printf("calling camellia_decrypt128\n");
+      camellia_decrypt128<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     } else {
-      camellia_decrypt256<<<grid_size, kThreadSize>>>(ctx->keytable, buf,
-                                                      offset_buf);
+      camellia_decrypt256<<<grid_size, kThreadSize>>>(key_buf, buf, offset_buf);
     }
   }
+  checkError(__LINE__);
+  cudaDeviceSynchronize();
+  checkError(__LINE__);
 
   cudaMemcpy(out, buf, copy_size, cudaMemcpyDeviceToHost);
-  cudaFree(buf);
-  cudaFree(offset_buf);
+  checkError(__LINE__);
 
   if (!encrypt) {
     _gen_checksum(reinterpret_cast<__int128_t*>(checksum),
                   reinterpret_cast<const __int128_t*>(out), process_size);
   }
 
+  // printf("out: ");
+  // for (size_t i = 0; i < numBlocks * CAMELLIA_BLOCK_SIZE && i < 16; ++i) {
+  //   printf("%02x ", out[i]);
+  // }
+  // printf("\n");
   return process_size;
 }
