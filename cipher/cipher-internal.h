@@ -32,10 +32,15 @@
    Thus we require a cipher with 128 bit blocklength.  */
 #define OCB_BLOCK_LEN  (128/8)
 
+#if defined(ENABLE_CUDA_SUPPORT)
+/* Support up to 16 GB */
+#define OCB_L_TABLE_SIZE 34
+#else
 /* The size of the pre-computed L table for OCB.  This takes the same
    size as the table used for GCM and thus we don't save anything by
    not using such a table.  */
 #define OCB_L_TABLE_SIZE 16
+#endif
 
 
 /* Check the above constants.  */

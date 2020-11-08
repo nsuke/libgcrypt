@@ -243,11 +243,12 @@ gcry_err_code_t
 _gcry_cipher_ocb_authenticate (gcry_cipher_hd_t c, const unsigned char *abuf,
                                size_t abuflen)
 {
-  const size_t table_maxblks = 1 << OCB_L_TABLE_SIZE;
-  const u32 table_size_mask = ((1 << OCB_L_TABLE_SIZE) - 1);
+  // NOTE: broken on 32-bit (or less) platform if CUDA is enabled
+  const u64 table_maxblks = 1ULL << OCB_L_TABLE_SIZE;
+  const u64 table_size_mask = ((1ULL << OCB_L_TABLE_SIZE) - 1);
   unsigned char l_tmp[OCB_BLOCK_LEN];
-  unsigned int burn = 0;
-  unsigned int nburn;
+  u64 burn = 0;
+  u64 nburn;
   size_t n;
 
   /* Check that a nonce and thus a key has been set and that we have
@@ -474,14 +475,6 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
            unsigned char *outbuf, size_t outbuflen,
            const unsigned char *inbuf, size_t inbuflen)
 {
-  const size_t table_maxblks = 1 << OCB_L_TABLE_SIZE;
-  const u32 table_size_mask = ((1 << OCB_L_TABLE_SIZE) - 1);
-  unsigned char l_tmp[OCB_BLOCK_LEN];
-  unsigned int burn = 0;
-  unsigned int nburn;
-  gcry_cipher_encrypt_t crypt_fn =
-      encrypt ? c->spec->encrypt : c->spec->decrypt;
-
   /* Check that a nonce and thus a key has been set and that we are
      not yet in end of data state. */
   if (!c->marks.iv || c->u_mode.ocb.data_finalized)
@@ -496,6 +489,30 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
     ; /* Allow arbitarty length. */
   else if ((inbuflen % OCB_BLOCK_LEN))
     return GPG_ERR_INV_LENGTH;  /* We support only full blocks for now.  */
+
+#if 0 && defined(ENABLE_CUDA_SUPPORT)
+  /*
+    GCRY_CIPHER_CAMELLIA128 = 310,
+    GCRY_CIPHER_CAMELLIA192 = 311,
+    GCRY_CIPHER_CAMELLIA256 = 312,
+    */
+  if (c->algo == GCRY_CIPHER_CAMELLIA128)
+    {
+      if (encrypt)
+        camellia_encrypt_ocb(outbuf, inbuf, inbuflen);
+      else
+        camellia_decrypt_ocb(outbuf, inbuf, inbuflen);
+      return 0;
+    }
+#endif
+  // NOTE: broken on 32-bit (or less) platform if CUDA is enabled
+  const u64 table_maxblks = 1ULL << OCB_L_TABLE_SIZE;
+  const u64 table_size_mask = ((1ULL << OCB_L_TABLE_SIZE) - 1);
+  unsigned char l_tmp[OCB_BLOCK_LEN];
+  u64 burn = 0;
+  u64 nburn;
+  gcry_cipher_encrypt_t crypt_fn =
+      encrypt ? c->spec->encrypt : c->spec->decrypt;
 
   /* Full blocks handling. */
   while (inbuflen >= OCB_BLOCK_LEN)
@@ -546,6 +563,9 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
 
       nblks = nblks < nmaxblks ? nblks : nmaxblks;
 
+#if !defined(ENABLE_CUDA_SUPPORT)
+      if (c->algo != GCRY_CIPHER_CAMELLIA128)
+#endif
       /* Since checksum xoring is done before/after encryption/decryption,
 	process input in 24KiB chunks to keep data loaded in L1 cache for
 	checksumming. */

@@ -207,20 +207,18 @@ extern void _gcry_camellia_aesni_avx2_ocb_auth(CAMELLIA_context *ctx,
 					       const u64 Ls[32]) ASM_FUNC_ABI;
 #endif
 
-#ifdef USE_CUDA
+#if defined(ENABLE_CUDA_SUPPORT)
 /* GPU implementations of Camellia using CUDA
  */
-extern void _gcry_camellia_cuda_ocb_enc(CAMELLIA_context *ctx,
-                                        unsigned char *out,
-                                        const unsigned char *in,
-                                        unsigned char *offset,
-                                        unsigned char *checksum) ASM_FUNC_ABI;
-
-extern void _gcry_camellia_cuda_ocb_dec(CAMELLIA_context *ctx,
-                                        unsigned char *out,
-                                        const unsigned char *in,
-                                        unsigned char *offset,
-                                        unsigned char *checksum) ASM_FUNC_ABI;
+extern u64 _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
+                                           unsigned char* out,
+                                           const unsigned char* in,
+                                           unsigned char* offset,
+                                           unsigned char* checksum,
+                                           uint64_t pos,
+                                           uint64_t numBlocks,
+                                           const unsigned char* L,
+                                           int encrypt);
 #endif
 
 static const char *selftest(void);
@@ -664,7 +662,7 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
   u64 blkn = c->u_mode.ocb.data_nblocks;
 
   burn_stack_depth = encrypt ? CAMELLIA_encrypt_stack_burn_size :
-			      CAMELLIA_decrypt_stack_burn_size;
+			       CAMELLIA_decrypt_stack_burn_size;
 #else
   (void)c;
   (void)outbuf_arg;
@@ -672,14 +670,18 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
   (void)encrypt;
 #endif
 
-#ifdef USE_CUDA
+#if defined(ENABLE_CUDA_SUPPORT)
   {
-    if (encrypt)
-      _gcry_camellia_cuda_ocb_enc(ctx, outbuf, inbuf, c->u_iv.iv,
-                                  c->u_ctr.ctr);
-    else
-      _gcry_camellia_cuda_ocb_dec(ctx, outbuf, inbuf, c->u_iv.iv,
-                                  c->u_ctr.ctr);
+    // NOTE: only supporting aligned input for now
+    if (blkn % CAMELLIA_BLOCK_SIZE != 0) {
+      printf("blkn is not aligned: %d\n", blkn);
+      return nblocks;
+    }
+    u64 processed = _gcry_camellia_cuda_ocb_encrypt(
+        ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
+        (const unsigned char*)c->u_mode.ocb.L, encrypt);
+    blkn += processed;
+    nblocks -= processed;
   }
 #else
 #ifdef USE_AESNI_AVX2
