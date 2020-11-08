@@ -672,11 +672,6 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
 
 #if defined(ENABLE_CUDA_SUPPORT)
   {
-    // NOTE: only supporting aligned input for now
-    if (blkn % CAMELLIA_BLOCK_SIZE != 0) {
-      printf("blkn is not aligned: %d\n", blkn);
-      return nblocks;
-    }
     u64 processed = _gcry_camellia_cuda_ocb_encrypt(
         ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
         (const unsigned char*)c->u_mode.ocb.L, encrypt);
