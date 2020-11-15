@@ -35,8 +35,11 @@ extern "C"
 cu_ocb::OcbConfig makeConfig()
 {
   cu_ocb::OcbConfig config{};
-  config.debug = false;
-  config.minimum_blocks = 32;
+  // config.debug = true;
+  // config.verify_with_cpu_result = true;
+  // config.checksum_on_gpu = false;
+  // config.minimum_blocks = 32;
+  // config.process_incomplete_block = false;
   return config;
 }
 
@@ -45,10 +48,16 @@ uint64_t _gcry_camellia_cuda_ocb_encrypt(
     unsigned char* offset, unsigned char* checksum, uint64_t pos,
     uint64_t num_blocks, const unsigned char* L, int encrypt)
 {
+  // return 0;
   static cu_ocb::OcbCamellia enc{std::move(makeConfig())};
   enc.setKeytable(ctx->keytable);
-  return enc.encrypt({reinterpret_cast<const char*>(in), num_blocks * 16}, pos,
-                     {reinterpret_cast<const char*>(L), 34 * 16},
-                     *reinterpret_cast<__uint128_t*>(checksum),
-                     *reinterpret_cast<__uint128_t*>(offset), out, encrypt);
+
+  constexpr size_t block_size = 16;
+  constexpr size_t l_size = 34;
+  auto result =
+      enc.encrypt({reinterpret_cast<const char*>(in), num_blocks * block_size},
+                  pos, {reinterpret_cast<const char*>(L), l_size * block_size},
+                  *reinterpret_cast<__uint128_t*>(checksum),
+                  *reinterpret_cast<__uint128_t*>(offset), out, encrypt);
+  return result;
 }

@@ -207,7 +207,7 @@ extern void _gcry_camellia_aesni_avx2_ocb_auth(CAMELLIA_context *ctx,
 					       const u64 Ls[32]) ASM_FUNC_ABI;
 #endif
 
-#if defined(ENABLE_CUDA_SUPPORT)
+#if defined(USE_CUDA)
 /* GPU implementations of Camellia using CUDA
  */
 extern u64 _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
@@ -670,15 +670,17 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
   (void)encrypt;
 #endif
 
-#if defined(ENABLE_CUDA_SUPPORT)
+#if defined(USE_CUDA)
   {
     u64 processed = _gcry_camellia_cuda_ocb_encrypt(
         ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
-        (const unsigned char*)c->u_mode.ocb.L, encrypt);
+        c->u_mode.ocb.L, encrypt);
     blkn += processed;
     nblocks -= processed;
+    outbuf += processed * CAMELLIA_BLOCK_SIZE;
+    inbuf  += processed * CAMELLIA_BLOCK_SIZE;
   }
-#else
+#endif
 #ifdef USE_AESNI_AVX2
   if (ctx->use_aesni_avx2)
     {
@@ -799,7 +801,6 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
 
       /* Use generic code to handle smaller chunks... */
     }
-#endif
 #endif
 
 #if defined(USE_AESNI_AVX) || defined(USE_AESNI_AVX2) || defined(USE_CUDA)
