@@ -71,6 +71,7 @@ static struct
     { HWF_PPC_ARCH_3_00,       "ppc-arch_3_00" },
     { HWF_PPC_ARCH_2_07,       "ppc-arch_2_07" },
 #endif
+    { HWF_NVIDIA_GPU,          "nvidia-gpu" },
   };
 
 /* A bit vector with the hardware features which shall not be used.

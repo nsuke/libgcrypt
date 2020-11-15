@@ -240,6 +240,8 @@ char **_gcry_strtokenize (const char *string, const char *delim);
 #define HWF_PPC_ARCH_3_00       (1 << 23)
 #define HWF_PPC_ARCH_2_07       (1 << 24)
 
+#define HWF_NVIDIA_GPU          (1 << 31)
+
 gpg_err_code_t _gcry_disable_hw_feature (const char *name);
 void _gcry_detect_hw_features (void);
 unsigned int _gcry_get_hw_features (void);

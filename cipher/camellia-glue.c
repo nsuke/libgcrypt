@@ -101,6 +101,9 @@ typedef struct
 {
   KEY_TABLE_TYPE keytable;
   int keybitlength;
+#ifdef USE_CUDA
+  unsigned int use_cuda:1;
+#endif
 #ifdef USE_AESNI_AVX
   unsigned int use_aesni_avx:1;	/* AES-NI/AVX implementation shall be used.  */
 #endif /*USE_AESNI_AVX*/
@@ -263,6 +266,9 @@ camellia_setkey(void *c, const byte *key, unsigned keylen,
   if(selftest_failed)
     return GPG_ERR_SELFTEST_FAILED;
 
+#ifdef USE_CUDA
+  ctx->use_cuda = (hwf & HWF_NVIDIA_GPU);
+#endif
 #ifdef USE_AESNI_AVX
   ctx->use_aesni_avx = (hwf & HWF_INTEL_AESNI) && (hwf & HWF_INTEL_AVX);
 #endif
@@ -671,15 +677,16 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
 #endif
 
 #if defined(USE_CUDA)
-  {
-    u64 processed = _gcry_camellia_cuda_ocb_encrypt(
-        ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
-        c->u_mode.ocb.L, encrypt);
-    blkn += processed;
-    nblocks -= processed;
-    outbuf += processed * CAMELLIA_BLOCK_SIZE;
-    inbuf  += processed * CAMELLIA_BLOCK_SIZE;
-  }
+  if (ctx->use_cuda)
+    {
+      u64 processed = _gcry_camellia_cuda_ocb_encrypt(
+          ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
+          c->u_mode.ocb.L, encrypt);
+      blkn += processed;
+      nblocks -= processed;
+      outbuf += processed * CAMELLIA_BLOCK_SIZE;
+      inbuf  += processed * CAMELLIA_BLOCK_SIZE;
+    }
 #endif
 #ifdef USE_AESNI_AVX2
   if (ctx->use_aesni_avx2)

@@ -490,21 +490,6 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
   else if ((inbuflen % OCB_BLOCK_LEN))
     return GPG_ERR_INV_LENGTH;  /* We support only full blocks for now.  */
 
-#if 0 && defined(ENABLE_CUDA_SUPPORT)
-  /*
-    GCRY_CIPHER_CAMELLIA128 = 310,
-    GCRY_CIPHER_CAMELLIA192 = 311,
-    GCRY_CIPHER_CAMELLIA256 = 312,
-    */
-  if (c->algo == GCRY_CIPHER_CAMELLIA128)
-    {
-      if (encrypt)
-        camellia_encrypt_ocb(outbuf, inbuf, inbuflen);
-      else
-        camellia_decrypt_ocb(outbuf, inbuf, inbuflen);
-      return 0;
-    }
-#endif
   // NOTE: broken on 32-bit (or less) platform if CUDA is enabled
   const u64 table_maxblks = 1ULL << OCB_L_TABLE_SIZE;
   const u64 table_size_mask = ((1ULL << OCB_L_TABLE_SIZE) - 1);
