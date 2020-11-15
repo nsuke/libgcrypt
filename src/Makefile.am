@@ -125,7 +125,7 @@ libgcrypt_la_LIBADD = $(gcrypt_res) \
 	../cipher/libcipher.la \
 	../random/librandom.la \
 	../mpi/libmpi.la \
-	../compat/libcompat.la $(DL_LIBS) $(GPG_ERROR_LIBS)
+	../compat/libcompat.la $(DL_LIBS) $(GPG_ERROR_LIBS) -lprofiler
 
 
 dumpsexp_SOURCES = dumpsexp.c
