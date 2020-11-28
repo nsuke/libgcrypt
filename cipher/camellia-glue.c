@@ -267,7 +267,7 @@ camellia_setkey(void *c, const byte *key, unsigned keylen,
     return GPG_ERR_SELFTEST_FAILED;
 
 #ifdef USE_CUDA
-  ctx->use_cuda = (hwf & HWF_NVIDIA_GPU);
+  ctx->use_cuda = 1 && (hwf & HWF_NVIDIA_GPU);
 #endif
 #ifdef USE_AESNI_AVX
   ctx->use_aesni_avx = (hwf & HWF_INTEL_AESNI) && (hwf & HWF_INTEL_AVX);
