@@ -225,5 +225,11 @@ _gcry_detect_hw_features (void)
     hw_features = _gcry_hwf_detect_ppc ();
   }
 #endif
+#if defined (ENABLE_CUDA_SUPPORT)
+  {
+    // TODO: actually detect capability
+    hw_features |= HWF_NVIDIA_GPU;
+  }
+#endif
   hw_features &= ~disabled_hw_features;
 }
