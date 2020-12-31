@@ -121,6 +121,10 @@ GCRYPT_1.6 {
     _gcry_mpi_get_const;
 
     gcry_ctx_release;
+    gcry_ocb_elapsed;
+    gcry_ocb_elapsed_gpu_enc;
+    gcry_ocb_elapsed_gpu_offset;
+    gcry_ocb_elapsed_gpu_checksum;
 
   local:
     *;

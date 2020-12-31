@@ -45,6 +45,8 @@
 #include "bufhelp.h"
 #include "./cipher-internal.h"
 
+#include <time.h>
+
 
 /* Double the OCB_BLOCK_LEN sized block B in-place.  */
 static inline void
@@ -475,6 +477,7 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
            unsigned char *outbuf, size_t outbuflen,
            const unsigned char *inbuf, size_t inbuflen)
 {
+  time_t started, end;
   /* Check that a nonce and thus a key has been set and that we are
      not yet in end of data state. */
   if (!c->marks.iv || c->u_mode.ocb.data_finalized)
@@ -498,6 +501,8 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
   u64 nburn;
   gcry_cipher_encrypt_t crypt_fn =
       encrypt ? c->spec->encrypt : c->spec->decrypt;
+
+  started = clock();
 
   /* Full blocks handling. */
   while (inbuflen >= OCB_BLOCK_LEN)
@@ -674,6 +679,8 @@ ocb_crypt (gcry_cipher_hd_t c, int encrypt,
   if (burn > 0)
     _gcry_burn_stack (burn + 4*sizeof(void*));
 
+  end = clock();
+  ocb_elapsed += end - started;
   return 0;
 }
 

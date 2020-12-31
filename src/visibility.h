@@ -61,6 +61,10 @@ gcry_err_code_t gcry_md_get (gcry_md_hd_t hd, int algo,
 
 /* Now mark all symbols.  */
 
+MARK_VISIBLEX (gcry_ocb_elapsed_gpu_enc)
+MARK_VISIBLEX (gcry_ocb_elapsed_gpu_offset)
+MARK_VISIBLEX (gcry_ocb_elapsed_gpu_checksum)
+MARK_VISIBLEX (gcry_ocb_elapsed)
 MARK_VISIBLEX (gcry_check_version)
 MARK_VISIBLEX (gcry_control)
 
@@ -298,6 +302,10 @@ MARK_VISIBLEX (_gcry_mpi_get_const)
    between a public and an internal version is that the internal
    version use gpg_err_code_t and the public version gpg_error_t.  */
 
+#define gcry_ocb_elapsed_gpu_enc _gcry_USE_THE_UNDERSCORED_FUNCTION
+#define gcry_ocb_elapsed_gpu_offset _gcry_USE_THE_UNDERSCORED_FUNCTION
+#define gcry_ocb_elapsed_gpu_checksum _gcry_USE_THE_UNDERSCORED_FUNCTION
+#define gcry_ocb_elapsed            _gcry_USE_THE_UNDERSCORED_FUNCTION
 #define gcry_check_version          _gcry_USE_THE_UNDERSCORED_FUNCTION
 #define gcry_control                _gcry_USE_THE_UNDERSCORED_FUNCTION
 

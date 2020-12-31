@@ -27,6 +27,31 @@
 #include "context.h"
 #include "mpi.h"
 
+double ocb_elapsed = 0;
+double
+gcry_ocb_elapsed()
+{
+  return ocb_elapsed;
+}
+float ocb_elapsed_gpu_enc = 0;
+float
+gcry_ocb_elapsed_gpu_enc ()
+{
+  return ocb_elapsed_gpu_enc;
+}
+float ocb_elapsed_gpu_offset = 0;
+float
+gcry_ocb_elapsed_gpu_offset ()
+{
+  return ocb_elapsed_gpu_offset;
+}
+float ocb_elapsed_gpu_checksum = 0;
+float
+gcry_ocb_elapsed_gpu_checksum ()
+{
+  return ocb_elapsed_gpu_checksum;
+}
+
 const char *
 gcry_strerror (gcry_error_t err)
 {

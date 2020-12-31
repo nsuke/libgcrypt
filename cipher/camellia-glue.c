@@ -221,7 +221,10 @@ extern u64 _gcry_camellia_cuda_ocb_encrypt(CAMELLIA_context* ctx,
                                            uint64_t pos,
                                            uint64_t numBlocks,
                                            const unsigned char* L,
-                                           int encrypt);
+                                           int encrypt,
+    float* time_enc,
+    float* time_offset,
+    float* time_checksum);
 #endif
 
 static const char *selftest(void);
@@ -681,7 +684,11 @@ _gcry_camellia_ocb_crypt (gcry_cipher_hd_t c, void *outbuf_arg,
     {
       u64 processed = _gcry_camellia_cuda_ocb_encrypt(
           ctx, outbuf, inbuf, c->u_iv.iv, c->u_ctr.ctr, blkn, nblocks,
-          c->u_mode.ocb.L, encrypt);
+          c->u_mode.ocb.L, encrypt,
+          &ocb_elapsed_gpu_enc,
+          &ocb_elapsed_gpu_offset,
+          &ocb_elapsed_gpu_checksum
+          );
       blkn += processed;
       nblocks -= processed;
       outbuf += processed * CAMELLIA_BLOCK_SIZE;

@@ -288,5 +288,9 @@ EXPORTS
 
       gcry_ecc_get_algo_keylen  @249
       gcry_ecc_mul_point        @250
+      gcry_ocb_elapsed        @251
+      ocb_elapsed_gpu_enc        @252
+      ocb_elapsed_gpu_offset        @253
+      ocb_elapsed_gpu_checksum        @254
 
 ;; end of file with public symbols for Windows.

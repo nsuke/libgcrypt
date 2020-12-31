@@ -132,6 +132,11 @@ extern "C" {
 
 /* Wrappers for the libgpg-error library.  */
 
+extern double ocb_elapsed;
+extern float ocb_elapsed_gpu_enc;
+extern float ocb_elapsed_gpu_offset;
+extern float ocb_elapsed_gpu_checksum;
+
 typedef gpg_error_t gcry_error_t;
 typedef gpg_err_code_t gcry_err_code_t;
 typedef gpg_err_source_t gcry_err_source_t;
@@ -251,8 +256,10 @@ typedef struct
   void *data;   /* The buffer.  */
 } gcry_buffer_t;
 
-
-
+double gcry_ocb_elapsed (void);
+float gcry_ocb_elapsed_gpu_enc (void);
+float gcry_ocb_elapsed_gpu_offset (void);
+float gcry_ocb_elapsed_gpu_checksum (void);
 
 /* Check that the library fulfills the version requirement.  */
 const char *gcry_check_version (const char *req_version);
